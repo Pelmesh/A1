@@ -17,3 +17,7 @@ Java SpringBoot, Postgresql, freemarker
 1. Сервер запускается по пути http://localhost:8080/
 2. при переходе на сайт, парсится logins.csv, postings.csv и сохраняется в БД после чего выводится в виде таблицы
 3. есть сортировка по заданным значениям в самом начале страницы
+4. для Rest http://localhost:8080/api (Дата с - dateStart(yyyy-dd-MM), дата по = dateEnd(yyyy-dd-MM), авторизованная поставка = select(true,false))
+    Пример запросов
+    1) http://localhost:8080/api?select=false
+    2) http://localhost:8080/api?dateStart=2019-08-08&dateEnd=2020-08-08&select=false
