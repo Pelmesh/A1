@@ -5,15 +5,12 @@ import au.com.bytecode.opencsv.bean.ColumnPositionMappingStrategy;
 import au.com.bytecode.opencsv.bean.CsvToBean;
 import com.company.unauthorizedDeliveries.Repo.LoginsRepo;
 import com.company.unauthorizedDeliveries.Repo.PostingsRepo;
-import com.company.unauthorizedDeliveries.domein.Logins;
-import com.company.unauthorizedDeliveries.domein.Postings;
+import com.company.unauthorizedDeliveries.domain.Logins;
+import com.company.unauthorizedDeliveries.domain.Postings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.FileNotFoundException;
 import java.io.FileReader;
@@ -27,9 +24,9 @@ import java.util.List;
 @RequestMapping(value = "/")
 public class MainPageController {
     @Autowired
-    private LoginsRepo loginRepo;
+    public LoginsRepo loginRepo;
     @Autowired
-    private PostingsRepo postingsRepo;
+    public PostingsRepo postingsRepo;
 
     @GetMapping
     public String ParsFileController(Model model) throws IOException {
@@ -42,6 +39,18 @@ public class MainPageController {
         return "main";
     }
 
+    @GetMapping(value = "api")
+    @ResponseBody
+    public List<Postings> getJSON(@RequestParam(defaultValue = "") String dateStart,
+                                  @RequestParam(defaultValue = "") String dateEnd,
+                                  @RequestParam(defaultValue = "") String select) throws IOException {
+        loginRepo.deleteAll();
+        parseFileLogins();
+        postingsRepo.deleteAll();
+        parseFilePostings();
+        return searchData(dateStart, dateEnd, select);
+    }
+
     @PostMapping
     public String sort(@RequestParam String dateStart,
                        @RequestParam String dateEnd,
@@ -49,52 +58,51 @@ public class MainPageController {
                        Model model) {
 
         model.addAttribute("logins", loginRepo.findAll());
+        model.addAttribute("postings", searchData(dateStart, dateEnd, select));
+        return "main";
+    }
+
+    public List<Postings> searchData(String dateStart, String dateEnd, String select) {
         if (!dateStart.equals("") & dateEnd.equals("")) {
-            if (!select.equals("Авторизованная поставка?")) {
-                model.addAttribute("postings", postingsRepo.findAllByPstngDateAfter(LocalDate.parse(dateStart)));
-                return "main";
+            if (select.equals("true") || select.equals("false")) {
+                return postingsRepo.findAllByPstngDateAfterAndAuthorizedDelivery(LocalDate.parse(dateStart),
+                        Boolean.parseBoolean(select));
             } else {
-                model.addAttribute("postings", postingsRepo.findAllByPstngDateAfter(LocalDate.parse(dateStart)));
-                return "main";
+                return postingsRepo.findAllByPstngDateAfter(LocalDate.parse(dateStart));
             }
         }
         if (!dateEnd.equals("") & dateStart.equals("")) {
-            if (!select.equals("Авторизованная поставка?")) {
-                model.addAttribute("postings", postingsRepo.findAllByPstngDateBeforeAndAuthorizedDelivery(
+            if (select.equals("true") || select.equals("false")) {
+                return postingsRepo.findAllByPstngDateBeforeAndAuthorizedDelivery(
                         LocalDate.parse(dateEnd),
-                        Boolean.parseBoolean(select)));
-                return "main";
+                        Boolean.parseBoolean(select));
             } else {
-                model.addAttribute("postings", postingsRepo.findAllByPstngDateBefore(LocalDate.parse(dateEnd)));
-                return "main";
+                return postingsRepo.findAllByPstngDateBefore(LocalDate.parse(dateEnd));
             }
         }
         if (!dateEnd.equals("") & !dateStart.equals("")) {
-            if (!select.equals("Авторизованная поставка?")) {
-                model.addAttribute("postings", postingsRepo.findAllByPstngDateBetweenAndAuthorizedDelivery(
+            if (select.equals("true") || select.equals("false")) {
+                return postingsRepo.findAllByPstngDateBetweenAndAuthorizedDelivery(
                         LocalDate.parse(dateStart),
                         LocalDate.parse(dateEnd),
-                        Boolean.parseBoolean(select)));
-                return "main";
+                        Boolean.parseBoolean(select));
             } else {
-                model.addAttribute("postings", postingsRepo.findAllByPstngDateBetween(
+                return postingsRepo.findAllByPstngDateBetween(
                         LocalDate.parse(dateStart),
-                        LocalDate.parse(dateEnd)));
-                return "main";
+                        LocalDate.parse(dateEnd));
             }
         }
         if (dateEnd.equals("") & dateStart.equals("")) {
-            if (!select.equals("Авторизованная поставка?")) {
-                model.addAttribute("postings", postingsRepo.findAllByAuthorizedDelivery(
-                        Boolean.parseBoolean(select)));
-                return "main";
+            if (select.equals("true") || select.equals("false")) {
+                return postingsRepo.findAllByAuthorizedDelivery(
+                        Boolean.parseBoolean(select));
             } else {
-                model.addAttribute("postings", postingsRepo.findAll());
-                return "main";
+                return postingsRepo.findAll();
             }
         }
-        return "main";
+        return postingsRepo.findAll();
     }
+
 
     private void parseFilePostings() throws IOException {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d.MM.yyyy");

@@ -1,4 +1,4 @@
-package com.company.unauthorizedDeliveries.domein;
+package com.company.unauthorizedDeliveries.domain;
 
 import javax.persistence.*;
 import java.time.LocalDate;

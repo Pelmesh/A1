@@ -1,6 +1,6 @@
 package com.company.unauthorizedDeliveries.Repo;
 
-import com.company.unauthorizedDeliveries.domein.Postings;
+import com.company.unauthorizedDeliveries.domain.Postings;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;

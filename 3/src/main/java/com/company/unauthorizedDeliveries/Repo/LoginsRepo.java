@@ -1,10 +1,8 @@
 package com.company.unauthorizedDeliveries.Repo;
 
-import com.company.unauthorizedDeliveries.domein.Logins;
+import com.company.unauthorizedDeliveries.domain.Logins;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
 
 @Repository
 public interface LoginsRepo extends JpaRepository<Logins,Long>{
